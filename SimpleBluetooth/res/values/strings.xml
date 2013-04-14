@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SimpleBluetooth</string>
+    <string name="phone_mac_address">Phone MAC</string>
+    <string name="pc_mac_address">PC MAC</string>
+    <string name="mac_message">Enter your PC\'s MAC here</string>
+
+</resources>
