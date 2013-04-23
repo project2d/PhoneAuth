@@ -10,12 +10,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -50,7 +48,7 @@ public class BluetoothActivity extends Activity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		setContentView(R.layout.bluetooth_activity);
 		
 		SharedPreferences prefs = getSharedPreferences("PREFS",
 				MODE_WORLD_WRITEABLE);
@@ -240,30 +238,6 @@ public class BluetoothActivity extends Activity implements
 			sendCommand("xbacklight -set " + brightnessProgress);
 		} else if (seekBar.getId() == R.id.sb_volume) {
 			sendCommand("pactl set-sink-volume 0 -- " + volumeProgress + "%");
-		}
-	}
-
-	// Menu stuff
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main_menu, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		switch (item.getItemId()) {
-		case R.id.phone_mac : 
-			MessageAlert("MAC address", btAdapter.getAddress());
-			return true;
-			
-		case R.id.pc_mac :
-			startActivityForResult(new Intent(this, MacDialogActivity.class), 0);
-			return true;
-		
-		default:
-			return false;
 		}
 	}
 }

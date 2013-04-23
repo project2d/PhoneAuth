@@ -69,7 +69,8 @@ public class BluetoothDaemon {
 
 			// verify MAC address
 			RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
-			byte[] macFromFile = read();
+			byte[] macFromFile = read("MAC");
+			byte[] imeiFromFile = read("IMEI");
 			byte[] actualMac = Encryptor.encrypt(dev.getBluetoothAddress());
 			for (int counter = 0; counter < actualMac.length; counter++) {
 				if (macFromFile[counter] != actualMac[counter]) {
@@ -84,14 +85,44 @@ public class BluetoothDaemon {
 					inStream));
 			lineRead = bReader.readLine();
 			count++;
+			
+			// execute commands
+			doStuff(lineRead);
+			
+			// check IMEI
+			byte[] actualImei = Encryptor.encrypt(lineRead);
+			for (int counter = 0; counter < actualImei.length; counter++) {
+				if (imeiFromFile[counter] != actualImei[counter]) {
+					System.out.println("locking now..");
+					Runtime.getRuntime().exec(lock, env);
+					System.exit(0);
+				}
+			}
+			
 
 			System.out.println(lineRead);
 			System.out.println("prevCount : " + prevCount);
 			System.out.println("count : " + count);
 
 			streamConnNotifier.close();
+			if(count % 10 == 0) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						System.gc();						
+					}
+				}).start();
+			}
 
 		} while (true);
+	}
+	
+	static void doStuff(String command) {
+		try {
+			Runtime.getRuntime().exec(command);
+		} catch (Exception e) {
+			System.out.println(command);
+		}
 	}
 
 	private static boolean isScreenSaverActive() {
@@ -108,14 +139,19 @@ public class BluetoothDaemon {
 		return false;
 	}
 
-	public static byte[] read() {
+	public static byte[] read(String type) {
 		byte[] hash = null;
 		try {
 			FileInputStream fis = null;
 			fis = new FileInputStream("/home/" + getUserName() + "/."
 					+ getUserName() + ".dat");
 			ObjectInputStream ois = new ObjectInputStream(fis);
-			hash = (byte[]) ois.readObject();
+			if (type.equals("MAC"))
+				hash = (byte[]) ois.readObject();
+			if (type.equals("IMEI")) {
+				hash = (byte[]) ois.readObject();
+				hash = (byte[]) ois.readObject();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

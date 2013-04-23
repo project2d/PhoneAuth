@@ -8,11 +8,13 @@ import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -25,17 +27,17 @@ public class BluetoothSender extends Service {
 	private static final UUID MY_UUID = UUID
 			.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static String address;
-	
+
 	private final IBinder mBinder = new MyBinder();
 	private Handler handler = new Handler();
 	private boolean sendOrder;
-	
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		SharedPreferences prefs = getSharedPreferences("PREFS",
 				MODE_WORLD_WRITEABLE);
-		if(prefs.contains("pcMacAddress"))
+		if (prefs.contains("pcMacAddress"))
 			address = prefs.getString("pcMacAddress", "");
 		sendOrder = true;
 	}
@@ -46,21 +48,21 @@ public class BluetoothSender extends Service {
 		sendOrder = false;
 	}
 
-
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		btAdapter = BluetoothAdapter.getDefaultAdapter();
 		Runnable runnable = new Runnable() {
-			
+
 			@Override
 			public void run() {
 				Log.d("BluetoothSender", "Sending command..");
 				sendCommand();
-				if(sendOrder) handler.postDelayed(this, 10000);
+				if (sendOrder)
+					handler.postDelayed(this, 10000);
 			}
 		};
 		handler.postDelayed(runnable, 1000);
-		
+
 		Log.d("BluetoothSender", "onStartCommand");
 		Toast.makeText(getApplicationContext(), "Bluetooth Service Started",
 				Toast.LENGTH_SHORT).show();
@@ -77,9 +79,10 @@ public class BluetoothSender extends Service {
 			return BluetoothSender.this;
 		}
 	}
-	
+
 	void sendCommand() {
-		String strMsg = "Hello from Android.. \n";
+		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		String strMsg = manager.getDeviceId() + "\n";
 		byte[] msgBuffer = strMsg.getBytes();
 		try {
 			BluetoothDevice device = btAdapter.getRemoteDevice(address);
@@ -105,7 +108,7 @@ public class BluetoothSender extends Service {
 				e.printStackTrace();
 			}
 			outStream.write(msgBuffer);
-			
+
 			Log.d("BluetoothSender", "Successfully sent..");
 
 		} catch (Exception e) {

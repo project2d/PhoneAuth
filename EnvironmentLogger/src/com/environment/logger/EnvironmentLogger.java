@@ -2,7 +2,6 @@ package com.environment.logger;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Map;
 
 public class EnvironmentLogger {
@@ -19,8 +18,9 @@ public class EnvironmentLogger {
 			}
 			out.close();
 			fstream.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			
 		}
 	}
 }
